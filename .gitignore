@@ -216,3 +216,12 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# GNS3 / VM files
+*.vmdk
+*.vmx
+*.vdi
+*.ova
+*.ovf
+*.gns3project
+gns3_files/

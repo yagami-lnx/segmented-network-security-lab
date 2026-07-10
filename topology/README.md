@@ -1,5 +1,7 @@
 # Topology Overview
 
+![Topology Diagram](topology-overview.png)
+
 ## Network Design
 
 The lab uses a segmented topology built around Router-on-a-Stick inter-VLAN routing, 

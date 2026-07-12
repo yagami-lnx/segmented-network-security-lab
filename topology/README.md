@@ -38,10 +38,11 @@ isn't blocked), but any reply traffic — sourced from VLAN 10, destined for VLA
 VLAN30↔VLAN10 connection non-functional, despite the block being one-directional 
 by design.
 
+```
 access-list 100 deny ip 192.168.10.0 0.0.0.255 192.168.30.0 0.0.0.255
 access-list 100 permit ip any any
 interface f0/0.10
 ip access-group 100 in
-
+```
 **Verification:** post-ACL, the same nmap scan against 192.168.30.0/24 from Kali 
 returned 0 hosts up (200+ second timeout), confirming the block is effective.

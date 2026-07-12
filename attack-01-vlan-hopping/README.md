@@ -27,6 +27,9 @@ block was effective:
 nmap -sn 192.168.30.0/24
 
 ```
+
+![Baseline nmap scan showing VLAN 30 unreachable](screenshots/nmap-baseline-blocked.png)
+
 Result: 0 hosts detected, confirming VLAN 10 has no visibility into VLAN 30 
 under normal conditions.
 

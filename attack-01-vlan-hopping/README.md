@@ -146,8 +146,31 @@ access-list 101 permit ip any any
 
 ```
 
+
+
 ![ACL 101 blocking re-verification](screenshots/reverify-acl101-match.png)
 
 The bypass is closed. VLAN 10 can no longer reach VLAN 30 via double-tagging, 
 even though the underlying tag-spoofing behavior on this switch image remains 
 unresolved — the fix holds at the routing layer regardless.
+
+
+## Lessons Learned
+
+Going in, I expected a clean pipeline: learn the theory, apply it, harden, verify. 
+The reality was messier and more valuable. Learning scapy meant building and 
+debugging a script from scratch with no prior tool-building experience. Getting 
+the attack working brought real excitement — followed immediately by confusion 
+when the textbook remediation didn't work as documented. That forced a proper 
+investigation: packet captures at every stage, cross-checking sources, and 
+eventually discovering the tool environment itself (a pre-release IOU image) was 
+likely behind the discrepancy — something no amount of re-reading theory would 
+have revealed. 
+
+The real lesson wasn't about VLAN hopping specifically — it was about how to 
+actually debug a security problem: don't trust a single explanation, verify with 
+evidence at each stage, and know when to stop chasing a root cause and instead 
+patch the actual risk at a point you can control. When the underlying platform 
+quirk turned out to be effectively unfixable within the lab's constraints, the 
+right move was hardening at a different layer (Layer 3 routing) rather than 
+continuing to chase an unresolvable Layer 2 mystery.

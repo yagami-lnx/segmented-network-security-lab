@@ -75,3 +75,79 @@ to their own MAC address. Since most operating systems passively trust unsolicit
 ARP replies, the target updates its ARP cache with false information — for 
 example, an attacker could claim to be the network's own router, redirecting 
 traffic through their machine and enabling man-in-the-middle interception.
+
+
+## Remediation
+
+### Attempted Fix #1 — Native VLAN Tagging
+
+The textbook fix for double-tagging is `vlan dot1q tag native`, which forces all 
+native VLAN traffic on a trunk to be explicitly tagged rather than sent untagged. 
+Since the attack relies on the switch treating native VLAN traffic as "safe to 
+send untagged" (stripping the outer tag as part of that assumption), forcing 
+explicit tagging should remove the ambiguity that makes stripping happen at all.
+
+**Result: this fix did not stop the attack.** ICMP traffic still reached 
+Metasploitable after this change was applied and verified (`show vlan dot1q tag 
+native` confirmed enabled, config saved).
+
+### Investigation
+
+Packet captures at each stage of the frame's path revealed the outer tag was 
+still being stripped somewhere between Kali and R1, despite native VLAN tagging 
+being enforced — behavior that contradicts documented Cisco switch behavior for 
+this exact command. `show version` on IOU1 confirmed the switch image in use is 
+an `EARLY DEPLOYMENT DEVELOPMENT BUILD` — a pre-release IOU image, not a 
+production Cisco IOS build. This is the most likely explanation for the 
+discrepancy: emulated/development-build switch images may not fully replicate 
+production ASIC-level tag-handling behavior, even when configured identically.
+
+Regardless of the exact cause, the underlying issue was clear: R1 trusts a 
+frame's VLAN tag at face value, with no way to verify it against the frame's 
+true physical origin. A spoofed frame tagged VLAN 30 arrives **inbound on R1's 
+f0/0.30 sub-interface** — with no ACL guarding that entry point — and is then 
+routed locally within VLAN 30 to reach Metasploitable, which sits on the same 
+directly-connected segment.
+
+### Attempted Fix #2 — Destination-Side ACL (Successful)
+
+Since the tag-based bypass could not be reliably closed at the switching layer, 
+the fix was moved to a checkpoint the attack cannot avoid: Layer 3 forwarding. 
+Regardless of which sub-interface a spoofed frame is associated with on arrival, 
+R1 must still forward it toward its true destination IP — and any traffic 
+reaching Metasploitable has to pass **outbound through f0/0.30** to get there, 
+even if it arrived on that same sub-interface.
+
+A second ACL (101) was applied outbound on f0/0.30, denying traffic sourced 
+from 192.168.10.0/24:
+
+```
+access-list 101 deny ip 192.168.10.0 0.0.0.255 192.168.30.0 0.0.0.255
+access-list 101 permit ip any any
+interface f0/0.30
+ip access-group 101 out
+```
+This catches the packet based on its unspoofable source/destination IP pair, 
+at the one processing point the attack cannot route around — regardless of 
+which VLAN tag trickery got it there.
+
+## Re-verification
+
+The exact same attack (`doubleQ.py`) was re-run after applying ACL 101.
+
+**Result:** no ICMP traffic was observed on Metasploitable's interface (`tcpdump -i 
+eth0 icmp` showed nothing), and `show access-lists 101` on R1 confirmed a match on 
+the deny rule — proving the packet was received and actively dropped, not simply 
+lost or misrouted.
+
+```
+access-list 101 deny ip 192.168.10.0 0.0.0.255 192.168.30.0 0.0.0.255 (1 match)
+access-list 101 permit ip any any
+
+```
+
+![ACL 101 blocking re-verification](screenshots/reverify-acl101-match.png)
+
+The bypass is closed. VLAN 10 can no longer reach VLAN 30 via double-tagging, 
+even though the underlying tag-spoofing behavior on this switch image remains 
+unresolved — the fix holds at the routing layer regardless.

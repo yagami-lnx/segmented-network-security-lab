@@ -25,7 +25,9 @@ See [`/topology`](./topology) for the full network diagram and addressing scheme
 
 ## Case Studies
 
-*(Coming soon — attack write-ups will be added here as they're completed)*
+- [Attack 01 — VLAN Hopping (Double-Tagging)](./attack-01-vlan-hopping/) — 
+  bypassing VLAN segmentation via 802.1Q double-tagging, with an unexpected 
+  detour into debugging a lab-environment quirk.
 
 ## Tools
 

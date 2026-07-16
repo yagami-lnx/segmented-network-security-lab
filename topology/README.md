@@ -1,6 +1,6 @@
 # Topology Overview
 
-![Topology Diagram](topology-overview.png)
+![Topology Diagram](topology-overview-update-alpine.png)
 
 ## Network Design
 
@@ -14,11 +14,10 @@ with a single Layer 2 switch handling VLAN separation and trunking.
 
 | VLAN ID | Name     | Subnet          | Gateway        | Connected Host(s)  |
 |---------|----------|-----------------|-----------------|---------------------|
-| 10      | ATTACKER | 192.168.10.0/24 | 192.168.10.1   | Kali Linux          |
+| 10      | ATTACKER | 192.168.10.0/24 | 192.168.10.1   | Kali Linux / Alpine Linux         |
 | 20      | INTERNAL | 192.168.20.0/24 | 192.168.20.1   | *(unassigned)*       |
 | 30      | SERVERS  | 192.168.30.0/24 | 192.168.30.1   | Metasploitable 2     |
 
-## Current Security Posture
 
 ## Current Security Posture
 
@@ -46,3 +45,17 @@ ip access-group 100 in
 ```
 **Verification:** post-ACL, the same nmap scan against 192.168.30.0/24 from Kali 
 returned 0 hosts up (200+ second timeout), confirming the block is effective.
+
+**Additional ACL (101):** during the VLAN hopping case study, a gap was found in 
+ACL 100's coverage — traffic that arrived via VLAN tag manipulation could bypass 
+the inbound check on f0/0.10 entirely. A second ACL was applied outbound on 
+f0/0.30, denying traffic sourced from 192.168.10.0/24 regardless of how it 
+entered the router. See [attack-01-vlan-hopping](../attack-01-vlan-hopping/) for 
+the full investigation and rationale.
+
+```
+access-list 101 deny ip 192.168.10.0 0.0.0.255 192.168.30.0 0.0.0.255
+access-list 101 permit ip any any
+interface f0/0.30
+ip access-group 101 out
+```

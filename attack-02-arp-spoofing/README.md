@@ -117,7 +117,7 @@ Both scripts were run simultaneously in separate terminals, poisoning
 Metasploitable2 (thinks Kali is R1) and R1 (thinks Kali is Metasploitable2) at 
 the same time and holding both entries in place continuously.
 
-![R1 ARP cache poisoned](screenshots/poc-arp-poisoned-r1.png)
+![R1 ARP cache poisoned](screenshots/poc-arp-after-r1.png)
 
 With both caches poisoned, IP forwarding was enabled on Kali 
 (`sysctl -w net.ipv4.ip_forward=1`), positioning Kali as a transparent relay. 

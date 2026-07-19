@@ -68,9 +68,11 @@ reverted once the victim's cache timeout expired — motivating the looped
 approach used in the full attack below.
 
 **Before** (legitimate entry, R1's real MAC):
+
 ![Metasploitable2 ARP cache — before poisoning](screenshots/poc-arp-before-meta.png)
 
 **After** (poisoned entry, Kali's MAC):
+
 ![Metasploitable2 ARP cache poisoned](screenshots/poc-arp-poisoned-meta.png)
 
 ## Exploitation (Full Attack)

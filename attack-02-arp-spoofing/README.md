@@ -73,7 +73,7 @@ approach used in the full attack below.
 
 **After** (poisoned entry, Kali's MAC):
 
-![Metasploitable2 ARP cache poisoned](screenshots/poc-arp-poisoned-meta.png)
+![Metasploitable2 ARP cache poisoned](screenshots/poc-arp-after-meta.png)
 
 ## Exploitation (Full Attack)
 

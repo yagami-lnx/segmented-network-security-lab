@@ -1,26 +1,20 @@
 # Topology Overview
-
-![Topology Diagram](topology-overview-update-alpine.png)
+![Topology Diagram](topology-overview-full.png)
 
 ## Network Design
-
 The lab uses a segmented topology built around Router-on-a-Stick inter-VLAN routing, 
 with a single Layer 2 switch handling VLAN separation and trunking.
-
 - **1x Router** — performs inter-VLAN routing via sub-interfaces (Router-on-a-Stick)
 - **1x Layer 2 Switch** — VLAN-aware, 802.1Q trunking configured to the router
 
 ## VLAN Segmentation
-
 | VLAN ID | Name     | Subnet          | Gateway        | Connected Host(s)  |
 |---------|----------|-----------------|-----------------|---------------------|
-| 10      | ATTACKER | 192.168.10.0/24 | 192.168.10.1   | Kali Linux / Alpine Linux         |
+| 10      | ATTACKER | 192.168.10.0/24 | 192.168.10.1   | Kali Linux / Alpine Linux / TinyCore Linux / Metasploitable2 (2nd instance) |
 | 20      | INTERNAL | 192.168.20.0/24 | 192.168.20.1   | *(unassigned)*       |
 | 30      | SERVERS  | 192.168.30.0/24 | 192.168.30.1   | Metasploitable 2     |
 
-
 ## Current Security Posture
-
 An initial connectivity test (`nmap -sn 192.168.30.0/24` from Kali) revealed that, 
 despite VLAN segmentation, inter-VLAN routing allowed full, unrestricted 
 communication between all three VLANs. This did not reflect a realistic security 
@@ -59,3 +53,8 @@ access-list 101 permit ip any any
 interface f0/0.30
 ip access-group 101 out
 ```
+**VLAN 10 additions:** Alpine Linux, TinyCore Linux, and a second Metasploitable2 
+instance were added to VLAN 10 for the ARP spoofing case study, providing 
+same-broadcast-domain targets. See 
+[attack-02-arp-spoofing](../attack-02-arp-spoofing/) for the full attack and 
+static ARP remediation applied to R1 and the second Metasploitable2 instance.

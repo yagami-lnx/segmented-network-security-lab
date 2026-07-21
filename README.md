@@ -28,6 +28,9 @@ See [`/topology`](./topology) for the full network diagram and addressing scheme
 - [Attack 01 — VLAN Hopping (Double-Tagging)](./attack-01-vlan-hopping/) — 
   bypassing VLAN segmentation via 802.1Q double-tagging, with an unexpected 
   detour into debugging a lab-environment quirk.
+- [Attack 02 — ARP Spoofing / MITM](./attack-02-arp-spoofing/) — bidirectional 
+  ARP cache poisoning enabling traffic interception and Telnet credential 
+  theft, with a deep dive into Dynamic ARP Inspection's platform limitations.
 
 ## Tools
 

@@ -31,6 +31,10 @@ See [`/topology`](./topology) for the full network diagram and addressing scheme
 - [Attack 02 — ARP Spoofing / MITM](./attack-02-arp-spoofing/) — bidirectional 
   ARP cache poisoning enabling traffic interception and Telnet credential 
   theft, with a deep dive into Dynamic ARP Inspection's platform limitations.
+- [Attack 03 — OSPF Route Manipulation](./attack-03-ospf-manipulation/) — 
+  forming a fraudulent OSPF adjacency by hand (Hello → DBD → LSAck) and 
+  injecting a forged route to blackhole traffic, hardened with MD5 
+  message-digest authentication.
 
 ## Tools
 

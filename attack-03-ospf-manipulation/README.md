@@ -306,7 +306,3 @@ the only way any of this actually becomes mine.
 
 The fake adjacency cannot form at all without a correctly matching MD5 key, 
 closing the vulnerability at its root.
-
-## Lessons Learned
-
-*(pending)*

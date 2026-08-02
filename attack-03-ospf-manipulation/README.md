@@ -5,6 +5,17 @@ the attacker and a legitimate router (R1), then inject forged routing data
 (a Router-LSA) to redirect or blackhole traffic intended for a protected 
 network segment.
 
+> **Setup note:** a second router (R2) was added to VLAN 10 specifically for 
+> this attack, to generate genuine OSPF Hello/DBD/LSA traffic between two 
+> real routers for Kali to observe and later exploit. It is not part of the 
+> lab's original three-VLAN design. A scoped exception was also added to ACLs 
+> 100 and 101 (`permit ip host 192.168.10.2 192.168.30.0 0.0.0.255`), 
+> allowing R2 specifically to reach VLAN 30 — needed to establish a genuine 
+> "before" baseline for the blackhole/DoS verification later in this 
+> write-up.
+
+![Attack-03 topology with R2 added](screenshots/topology-attack03.png)
+
 ## Attack Mechanism
 
 OSPF routers form neighbor relationships automatically with any device that 
@@ -220,3 +231,82 @@ This attack is particularly severe because it exploits *trust between
 routers themselves* — a layer most network defenses assume is inherently 
 safe, unlike host-level traffic which is more commonly scrutinized by 
 firewalls, IDS, or endpoint security.
+
+## Remediation
+
+Neutralizing this attack requires reintroducing the exact thing exploited: 
+authentication on OSPF Hello and control traffic, so a device can no longer 
+be trusted as a neighbor purely by matching config fields — it must also 
+prove possession of a shared secret.
+
+Two approaches were considered:
+
+- **Migrate to OSPFv3**, which mandates IPsec for authentication — a 
+  broader, more disruptive change that would also require addressing 
+  IPv6-related conventions and a completely separate security layer.
+- **Apply MD5 message-digest authentication to OSPFv2** (what the network 
+  already runs) — a narrower, more direct fix targeting the specific 
+  vulnerability (`authtype=0`, Null) exploited in this attack, without 
+  touching anything else about the existing setup.
+
+The message-digest approach was chosen as the more proportionate fix — it 
+closes the exact gap exploited without the added complexity of a protocol 
+version migration.
+
+**On R1 (interface f0/0.10):**
+
+```
+interface f0/0.10
+ip ospf authentication message-digest
+ip ospf message-digest-key 1 md5 0 networksecurity
+```
+
+**On R2 (matching interface, same key):**
+
+```
+interface f0/0
+ip ospf authentication message-digest
+ip ospf message-digest-key 1 md5 0 networksecurity
+```
+
+Applying this immediately dropped the *legitimate* R1-R2 adjacency until R2 
+was updated with the matching key — confirming the authentication 
+requirement was genuinely active and enforced, not just accepted silently.
+
+## Re-verification
+
+With MD5 authentication enforced, `ospf_hello.py` was run again unmodified 
+(still sending `authtype=0`, Null). R1 no longer registers any trace of the 
+fake router — no Init, no EXSTART, nothing:
+
+![R1 neighbor table after fix — fake router completely absent](screenshots/R1_state_after_fix.png)
+
+## Lessons Learned
+
+Going into this attack, I expected to learn OSPF's mechanics; what I 
+actually learned was harder to name — the difference between *executing* a 
+plan and *building* one. For most of this attack, I was following 
+instructions field-by-field: told which value mattered, which didn't, why a 
+sequence number needed to be higher. It felt productive, but a lot of that 
+work wasn't really mine yet — I was carrying out a plan, not designing one.
+
+That shifted right before the final injection packet. I realized I could 
+build the next script myself — sniff the real traffic, print its fields, 
+and reason from there what I actually needed — rather than waiting to be 
+told. I know I would have made real mistakes doing it that way: including 
+an unnecessary field, reusing a stale sequence number, missing something 
+that mattered. But that's exactly the point — those mistakes are how the 
+understanding actually forms. Following correct instructions teaches you 
+what works; making and finding your own mistakes teaches you *why*.
+
+The real lesson from this attack wasn't a specific OSPF field or scapy 
+syntax — it was learning to ask "what would I need to check to build this 
+myself" before asking for the answer. That's a slower way to work, but it's 
+the only way any of this actually becomes mine.
+
+The fake adjacency cannot form at all without a correctly matching MD5 key, 
+closing the vulnerability at its root.
+
+## Lessons Learned
+
+*(pending)*

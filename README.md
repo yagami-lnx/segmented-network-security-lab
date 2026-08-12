@@ -35,6 +35,10 @@ See [`/topology`](./topology) for the full network diagram and addressing scheme
   forming a fraudulent OSPF adjacency by hand (Hello → DBD → LSAck) and 
   injecting a forged route to blackhole traffic, hardened with MD5 
   message-digest authentication.
+- [Attack 04 — Exploiting Metasploitable (vsftpd + Samba)](./attack-04-metasploitable-exploitation/) — 
+  manual, tool-free exploitation of two vulnerable services — a planted 
+  backdoor and a real command injection vulnerability — with full 
+  remediation for both.
 
 ## Tools
 

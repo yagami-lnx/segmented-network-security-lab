@@ -21,7 +21,7 @@ See [`/topology`](./topology) for the full network diagram and addressing scheme
 - Network segmentation (VLANs, 802.1Q trunking, inter-VLAN routing)
 - Systematic troubleshooting of GNS3/VMware integration issues (vmrun/VIX 
   communication, hypervisor networking services, virtual disk conversion)
-- Custom security tool development in Python *(in progress)*
+- Custom security tool development in Python
 
 ## Case Studies
 
@@ -39,7 +39,11 @@ See [`/topology`](./topology) for the full network diagram and addressing scheme
   manual, tool-free exploitation of two vulnerable services — a planted 
   backdoor and a real command injection vulnerability — with full 
   remediation for both.
-
+- [Attack 05 — SSH Credential Attack (Weak Passwords)](./attack-05-ssh-credential-attack/) — 
+  exploiting name+year password patterns via a custom paramiko brute-forcer 
+  rather than a protocol vulnerability, hardened with key-based auth and 
+  disabled password/root login.
+  
 ## Tools
 
 - GNS3 — network simulation
